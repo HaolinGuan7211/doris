@@ -627,6 +627,12 @@ DEFINE_mInt32(slave_replica_writer_rpc_timeout_sec, "60");
 // Whether to enable stream load record function, the default is false.
 // False: disable stream load record
 DEFINE_mBool(enable_stream_load_record, "false");
+// Whether to enable stream load record to audit log table, the default is true.
+DEFINE_mBool(enable_stream_load_record_to_audit_log_table, "false");
+// the maximum bytes of a batch of stream load records to audit log table
+DEFINE_mInt64(stream_load_record_batch_bytes, "104857600"); // 100MB
+// the interval to send a batch of stream load records to audit log table
+DEFINE_mInt64(stream_load_record_batch_interval_secs, "120"); // 2 minutes
 // batch size of stream load record reported to FE
 DEFINE_mInt32(stream_load_record_batch_size, "50");
 // expire time of stream load record in rocksdb.
@@ -1318,6 +1324,7 @@ DEFINE_String(user_files_secure_path, "${DORIS_HOME}");
 DEFINE_Int32(fe_expire_duration_seconds, "60");
 
 DEFINE_Int32(grace_shutdown_wait_seconds, "120");
+DEFINE_Int32(grace_shutdown_post_delay_seconds, "30");
 
 DEFINE_Int16(bitmap_serialize_version, "1");
 

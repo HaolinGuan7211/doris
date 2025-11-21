@@ -648,6 +648,12 @@ DECLARE_mInt32(slave_replica_writer_rpc_timeout_sec);
 // Whether to enable stream load record function, the default is false.
 // False: disable stream load record
 DECLARE_mBool(enable_stream_load_record);
+// Whether to enable stream load record to audit log table, the default is true.
+DECLARE_mBool(enable_stream_load_record_to_audit_log_table);
+// the maximum bytes of a batch of stream load records to audit log table
+DECLARE_mInt64(stream_load_record_batch_bytes);
+// the interval to send a batch of stream load records to audit log table
+DECLARE_mInt64(stream_load_record_batch_interval_secs);
 // batch size of stream load record reported to FE
 DECLARE_mInt32(stream_load_record_batch_size);
 // expire time of stream load record in rocksdb.
@@ -1369,6 +1375,12 @@ DECLARE_Int32(fe_expire_duration_seconds);
 // , but if the waiting time exceed the limit, then be will exit directly.
 // During this period, FE will not send any queries to BE and waiting for all running queries to stop.
 DECLARE_Int32(grace_shutdown_wait_seconds);
+// When using the graceful stop feature, after the main process waits for
+// all currently running tasks to finish, it will continue to wait for
+// an additional period to ensure that queries still running on other nodes have also completed.
+// Since a BE node cannot detect the task execution status on other BE nodes,
+// you may need to increase this threshold to allow for a longer waiting time.
+DECLARE_Int32(grace_shutdown_post_delay_seconds);
 
 // BitmapValue serialize version.
 DECLARE_Int16(bitmap_serialize_version);

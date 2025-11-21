@@ -219,10 +219,17 @@ Status DataTypeNumberSerDe<T>::read_column_from_arrow(IColumn& column,
         const auto* concrete_array = dynamic_cast<const arrow::StringArray*>(arrow_array);
         std::shared_ptr<arrow::Buffer> buffer = concrete_array->value_data();
 
+        const auto* offsets_data = concrete_array->value_offsets()->data();
+        const size_t offset_size = sizeof(int32_t);
         for (size_t offset_i = start; offset_i < end; ++offset_i) {
             if (!concrete_array->IsNull(offset_i)) {
-                const auto* raw_data = buffer->data() + concrete_array->value_offset(offset_i);
-                const auto raw_data_len = concrete_array->value_length(offset_i);
+                int32_t start_offset = 0;
+                int32_t end_offset = 0;
+                memcpy(&start_offset, offsets_data + offset_i * offset_size, offset_size);
+                memcpy(&end_offset, offsets_data + (offset_i + 1) * offset_size, offset_size);
+
+                const auto* raw_data = buffer->data() + start_offset;
+                const auto raw_data_len = end_offset - start_offset;
 
                 if (raw_data_len == 0) {
                     col_data.emplace_back(Int128()); // Int128() is NULL
@@ -500,18 +507,18 @@ Status DataTypeNumberSerDe<T>::_write_column_to_mysql(const IColumn& column,
 }
 
 template <PrimitiveType T>
-Status DataTypeNumberSerDe<T>::write_column_to_mysql(const IColumn& column,
-                                                     MysqlRowBuffer<true>& row_buffer,
-                                                     int64_t row_idx, bool col_const,
-                                                     const FormatOptions& options) const {
+Status DataTypeNumberSerDe<T>::write_column_to_mysql_binary(const IColumn& column,
+                                                            MysqlRowBinaryBuffer& row_buffer,
+                                                            int64_t row_idx, bool col_const,
+                                                            const FormatOptions& options) const {
     return _write_column_to_mysql(column, row_buffer, row_idx, col_const, options);
 }
 
 template <PrimitiveType T>
-Status DataTypeNumberSerDe<T>::write_column_to_mysql(const IColumn& column,
-                                                     MysqlRowBuffer<false>& row_buffer,
-                                                     int64_t row_idx, bool col_const,
-                                                     const FormatOptions& options) const {
+Status DataTypeNumberSerDe<T>::write_column_to_mysql_text(const IColumn& column,
+                                                          MysqlRowTextBuffer& row_buffer,
+                                                          int64_t row_idx, bool col_const,
+                                                          const FormatOptions& options) const {
     return _write_column_to_mysql(column, row_buffer, row_idx, col_const, options);
 }
 
